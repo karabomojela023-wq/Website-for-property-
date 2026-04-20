@@ -1,66 +1,747 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Finder</title>
+    <title>Property Rent Tracker - All Properties</title>
     <style>
-        body {
-            margin: 0;
-            font-family: system-ui, sans-serif;
-            background: navy;
-            color: white;
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
-        header {
-            background: turquoise;
+        body {
+            background: #f0f2f5;
+            margin: 0;
             padding: 20px;
-            text-align: center;
-            color: navy;
         }
         .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
         }
-        .card {
-            background: white;
-            color: navy;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        h1 {
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+        .sub {
+            color: #4a627a;
+            margin-bottom: 25px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: #f0f2f5;
+            padding: 10px 0;
+            z-index: 100;
         }
         button {
-            background: turquoise;
+            background: #1e3a5f;
+            color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
-            color: navy;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #0f2b46;
+        }
+        .btn-danger {
+            background: #b91c1c;
+        }
+        .btn-danger:hover {
+            background: #7f1a1a;
+        }
+        .btn-success {
+            background: #15803d;
+        }
+        .filter-btns {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .filter-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .filter-btn.active {
+            background: #1e3a5f;
+            color: white;
+        }
+        .property-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .property-header {
+            background: #1e3a5f;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .property-header:hover {
+            background: #0f2b46;
+        }
+        .property-header .toggle-icon {
+            font-size: 1.2rem;
+        }
+        .property-content {
+            display: none;
+            overflow-x: auto;
+        }
+        .property-content.show {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-unpaid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-vacant {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .toggle-paid {
+            background: #22c55e;
+            color: white;
+        }
+        .toggle-unpaid {
+            background: #ef4444;
+            color: white;
+        }
+        .toggle-vacant {
+            background: #6c757d;
+            color: white;
+            cursor: not-allowed;
+        }
+        .summary {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .summary-item {
+            background: #f1f5f9;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+        .summary-item strong {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        .vacant-text {
+            color: #6c757d;
+            font-style: italic;
+        }
+        .deposit-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+        @media (max-width: 900px) {
+            body { padding: 10px; }
+            th, td { font-size: 0.7rem; padding: 6px 4px; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>🏠 Property Listings</h1>
-        <p>Find your dream home</p>
-    </header>
-    <div class="container">
-        <div class="card">
-            <h2>Modern Family House</h2>
-            <p>3 beds • 2 baths • 1,500 sq ft</p>
-            <button>View Details</button>
-        </div>
-        <div class="card">
-            <h2>Downtown Condo</h2>
-            <p>2 beds • 2 baths • 1,100 sq ft</p>
-            <button>View Details</button>
-        </div>
-        <div class="card">
-            <h2>Lakeside Villa</h2>
-            <p>4 beds • 3 baths • 2,400 sq ft</p>
-            <button>View Details</button>
+<div class="container">
+    <h1>🏘️ Property Rent Tracker</h1>
+    <div class="sub">All Properties | Click on address to expand/collapse</div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="controls">
+        <button id="expandAllBtn">📂 Expand All</button>
+        <button id="collapseAllBtn">📁 Collapse All</button>
+        <button id="markAllUnpaidBtn" class="btn-danger">📝 New Month - Mark All Unpaid</button>
+        <button id="exportDataBtn" class="btn-success">📎 Export Backup</button>
+        <div class="filter-btns">
+            <button class="filter-btn active" data-filter="all">All Rooms</button>
+            <button class="filter-btn" data-filter="unpaid">Unpaid Only</button>
+            <button class="filter-btn" data-filter="paid">Paid Only</button>
         </div>
     </div>
+
+    <div id="propertiesContainer"></div>
+</div>
+
+<script>
+    // ==================== ALL PROPERTIES DATA ====================
+    
+    const propertiesData = [
+        {
+            id: "23_6th",
+            name: "23 6th Avenue",
+            rooms: [
+                { id: "G1", name: "G1", tenant: "Moving out month end", phone: "", paid: false, vacant: false, notes: "Vacating end of month" },
+                { id: "G2", name: "G2", tenant: "Matshika Pfani", phone: "0607451922", paid: false, vacant: false, notes: "" },
+                { id: "G3", name: "G3", tenant: "Douglas", phone: "0739560599", paid: false, vacant: false, notes: "" },
+                { id: "G4", name: "G4", tenant: "Lulama", phone: "0838562429", paid: false, vacant: false, notes: "" },
+                { id: "G5", name: "G5", tenant: "Kim", phone: "0613522513", paid: false, vacant: false, notes: "" },
+                { id: "G6", name: "G6", tenant: "Veronica", phone: "0789523288", paid: false, vacant: false, notes: "" },
+                { id: "G7", name: "G7", tenant: "Tshego", phone: "0839656860", paid: false, vacant: false, notes: "" },
+                { id: "G8", name: "G8", tenant: "Nolwazi", phone: "0710088295", paid: false, vacant: false, notes: "" },
+                { id: "G9", name: "G9", tenant: "Buhle", phone: "0691618575", paid: false, vacant: false, notes: "" },
+                { id: "G10", name: "G10", tenant: "Jane", phone: "0729157189", paid: false, vacant: false, notes: "" },
+                { id: "G11", name: "G11", tenant: "Nthabiseng", phone: "0849491087", paid: false, vacant: false, notes: "" },
+                { id: "G12", name: "G12", tenant: "Vusi", phone: "0634863675", paid: false, vacant: false, notes: "" },
+                { id: "G13", name: "G13", tenant: "Tebogo Sobudula", phone: "0737834277", paid: false, vacant: false, notes: "" },
+                { id: "G14", name: "G14", tenant: "Kgantse", phone: "0732299085", paid: false, vacant: false, notes: "" },
+                { id: "G15", name: "G15", tenant: "David", phone: "0632665897", paid: false, vacant: false, notes: "" },
+                { id: "G16", name: "G16", tenant: "Kearabetswe", phone: "0837522969", paid: false, vacant: false, notes: "" },
+                { id: "G17", name: "G17", tenant: "Letticia", phone: "0640154619", paid: false, vacant: false, notes: "" },
+                { id: "G18", name: "G18", tenant: "MaQueen", phone: "0629948110", paid: false, vacant: false, notes: "" },
+                { id: "G19", name: "G19", tenant: "Tebogo", phone: "0725395438", paid: false, vacant: false, notes: "" },
+                { id: "G20", name: "G20", tenant: "Phemelo", phone: "0683829483", paid: false, vacant: false, notes: "" },
+                { id: "G21", name: "G21", tenant: "Brian", phone: "0655194715", paid: false, vacant: false, notes: "" },
+                { id: "G22", name: "G22", tenant: "Galaletsang", phone: "0781170071", paid: false, vacant: false, notes: "" },
+                { id: "G23", name: "G23", tenant: "Kopano", phone: "0735700561", paid: false, vacant: false, notes: "" },
+                { id: "G24", name: "G24", tenant: "Nthabiseng", phone: "0683894897", paid: false, vacant: false, notes: "" },
+                { id: "G25", name: "G25", tenant: "Ntombi", phone: "0763069871", paid: false, vacant: false, notes: "" },
+                { id: "G26", name: "G26", tenant: "Samkelo", phone: "0762692814", paid: false, vacant: false, notes: "" },
+                { id: "G27", name: "G27", tenant: "Penny", phone: "0783824756", paid: false, vacant: false, notes: "" },
+                { id: "G28", name: "G28", tenant: "Lucas", phone: "0735292763", paid: false, vacant: false, notes: "" },
+                { id: "G29", name: "G29", tenant: "Victor", phone: "0650921972", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "18_6th",
+            name: "18 6th Avenue",
+            rooms: [
+                { id: "H3", name: "H3", tenant: "Valentine", phone: "0634371680", paid: false, vacant: false, notes: "" },
+                { id: "H4", name: "H4", tenant: "Conny", phone: "0670578367", paid: false, vacant: false, notes: "" },
+                { id: "H5", name: "H5", tenant: "Volovolo", phone: "0733350866", paid: false, vacant: false, notes: "" },
+                { id: "H6", name: "H6", tenant: "Sharon", phone: "0796437611", paid: false, vacant: false, notes: "" },
+                { id: "H7", name: "H7", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H8", name: "H8", tenant: "Carlos", phone: "0630721641", paid: false, vacant: false, notes: "" },
+                { id: "H9", name: "H9", tenant: "Asanda", phone: "0635618493", paid: false, vacant: false, notes: "" },
+                { id: "H10", name: "H10", tenant: "Zoliswa", phone: "0632662346", paid: false, vacant: false, notes: "" },
+                { id: "H11", name: "H11", tenant: "Maureen", phone: "0721861407", paid: false, vacant: false, notes: "" },
+                { id: "H12", name: "H12", tenant: "Jualane", phone: "0837219269", paid: false, vacant: false, notes: "" },
+                { id: "H13", name: "H13", tenant: "Tsholofelo", phone: "0625350583", paid: false, vacant: false, notes: "" },
+                { id: "H14", name: "H14", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H15", name: "H15", tenant: "Lindiwe", phone: "0833400243", paid: false, vacant: false, notes: "" },
+                { id: "H16", name: "H16", tenant: "Deposit", phone: "", paid: false, vacant: false, notes: "Deposit recorded" },
+                { id: "H17", name: "H17", tenant: "Nombulelo", phone: "0798127564", paid: false, vacant: false, notes: "" },
+                { id: "H18", name: "H18", tenant: "Norman", phone: "0665887332", paid: false, vacant: false, notes: "" },
+                { id: "H19", name: "H19", tenant: "Joseph", phone: "0719080533", paid: false, vacant: false, notes: "" },
+                { id: "H20", name: "H20", tenant: "Surprise", phone: "0799540861", paid: false, vacant: false, notes: "" },
+                { id: "H21", name: "H21", tenant: "Chris", phone: "0750804383", paid: false, vacant: false, notes: "" },
+                { id: "H22", name: "H22", tenant: "Kgomotso", phone: "0719902462", paid: false, vacant: false, notes: "" },
+                { id: "H23", name: "H23", tenant: "Bheki", phone: "0729689820", paid: false, vacant: false, notes: "" },
+                { id: "H24", name: "H24", tenant: "John", phone: "0722199166", paid: false, vacant: false, notes: "" },
+                { id: "H25", name: "H25", tenant: "Mpho", phone: "0764740987", paid: false, vacant: false, notes: "" },
+                { id: "H26", name: "H26", tenant: "Mahlatse", phone: "0781331512", paid: false, vacant: false, notes: "" },
+                { id: "H27", name: "H27", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H28", name: "H28", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H29", name: "H29", tenant: "Nomusa", phone: "0810431557", paid: false, vacant: false, notes: "" },
+                { id: "H30", name: "H30", tenant: "Kisha", phone: "0636627431", paid: false, vacant: false, notes: "" },
+                { id: "H31", name: "H31", tenant: "Minente", phone: "0737898753", paid: false, vacant: false, notes: "" },
+                { id: "H32", name: "H32", tenant: "Ibrahim", phone: "0684882245", paid: false, vacant: false, notes: "" },
+                { id: "H33", name: "H33", tenant: "John Kwangwari", phone: "0611694259", paid: false, vacant: false, notes: "" },
+                { id: "H34", name: "H34", tenant: "Xola", phone: "0678882580", paid: false, vacant: false, notes: "" },
+                { id: "H35", name: "H35", tenant: "Joshua", phone: "0698713874", paid: false, vacant: false, notes: "" },
+                { id: "H36", name: "H36", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H37", name: "H37", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H38", name: "H38", tenant: "Thandeka", phone: "0604228557", paid: false, vacant: false, notes: "" },
+                { id: "H39", name: "H39", tenant: "Charles", phone: "0638026956", paid: false, vacant: false, notes: "" },
+                { id: "H40", name: "H40", tenant: "Thamani", phone: "0791743932", paid: false, vacant: false, notes: "" },
+                { id: "H41", name: "H41", tenant: "Tlotlo", phone: "0631533338", paid: false, vacant: false, notes: "" },
+                { id: "H42", name: "H42", tenant: "Sebonelo", phone: "0817155365", paid: false, vacant: false, notes: "" },
+                { id: "H43", name: "H43", tenant: "Zeeco", phone: "0790160972", paid: false, vacant: false, notes: "" },
+                { id: "H44", name: "H44", tenant: "Andile", phone: "0678365182", paid: false, vacant: false, notes: "" },
+                { id: "H45", name: "H45", tenant: "Sipho", phone: "0631980375", paid: false, vacant: false, notes: "" },
+                { id: "H46", name: "H46", tenant: "Tshireletso", phone: "0794626614", paid: false, vacant: false, notes: "" },
+                { id: "H47", name: "H47", tenant: "Endinako", phone: "0716628783", paid: false, vacant: false, notes: "" },
+                { id: "H48", name: "H48", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "H49", name: "H49", tenant: "Sthobile", phone: "", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "21_6th",
+            name: "21 6th Avenue",
+            rooms: [
+                { id: "F1", name: "F1", tenant: "Silas", phone: "0782100168", paid: false, vacant: false, notes: "" },
+                { id: "F2", name: "F2", tenant: "Amanda", phone: "0837042835", paid: false, vacant: false, notes: "" },
+                { id: "F3", name: "F3", tenant: "Karabo", phone: "0694850111", paid: false, vacant: false, notes: "" },
+                { id: "F4", name: "F4", tenant: "Tebogo", phone: "0719197162", paid: false, vacant: false, notes: "" },
+                { id: "F5", name: "F5", tenant: "Beauty", phone: "0788738547", paid: false, vacant: false, notes: "" },
+                { id: "F6", name: "F6", tenant: "Solomon", phone: "0784679245", paid: false, vacant: false, notes: "" },
+                { id: "F7", name: "F7", tenant: "Mapaseka", phone: "0833717519", paid: false, vacant: false, notes: "" },
+                { id: "F8", name: "F8", tenant: "Eunice", phone: "0717705982", paid: false, vacant: false, notes: "" },
+                { id: "F9", name: "F9", tenant: "Priscilla", phone: "0818677124", paid: false, vacant: false, notes: "" },
+                { id: "F10", name: "F10", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "F11", name: "F11", tenant: "Busie", phone: "0712401278", paid: false, vacant: false, notes: "" },
+                { id: "F12", name: "F12", tenant: "Migirl", phone: "0670872427", paid: false, vacant: false, notes: "" },
+                { id: "F13", name: "F13", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "F14", name: "F14", tenant: "Ronewa", phone: "0798129282", paid: false, vacant: false, notes: "" },
+                { id: "F15", name: "F15", tenant: "Dokie", phone: "0765119209", paid: false, vacant: false, notes: "" },
+                { id: "F16", name: "F16", tenant: "Nosipho", phone: "0789347895", paid: false, vacant: false, notes: "" },
+                { id: "F17", name: "F17", tenant: "Ofentse", phone: "0639223638", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "29_3rd",
+            name: "29 3rd Avenue",
+            rooms: [
+                { id: "K1", name: "K1", tenant: "Deborah", phone: "0730232645", paid: false, vacant: false, notes: "" },
+                { id: "K2", name: "K2", tenant: "Nelisa", phone: "0719993290", paid: false, vacant: false, notes: "" },
+                { id: "K3", name: "K3", tenant: "Ntombifuthi", phone: "0767724741", paid: false, vacant: false, notes: "" },
+                { id: "K4", name: "K4", tenant: "Lesedi", phone: "0658341146", paid: false, vacant: false, notes: "" },
+                { id: "K5", name: "K5", tenant: "Nqobile Ngwenya", phone: "0739850388", paid: false, vacant: false, notes: "" },
+                { id: "K6", name: "K6", tenant: "Mamoraka", phone: "0719650909", paid: false, vacant: false, notes: "" },
+                { id: "K7", name: "K7", tenant: "Angela Mojela", phone: "0712457957", paid: false, vacant: false, notes: "" },
+                { id: "K8", name: "K8", tenant: "Malope Motshana", phone: "0764143560", paid: false, vacant: false, notes: "" },
+                { id: "K9", name: "K9", tenant: "Thato", phone: "0699732158", paid: false, vacant: false, notes: "" },
+                { id: "K10", name: "K10", tenant: "Kelebone", phone: "0734584083", paid: false, vacant: false, notes: "" },
+                { id: "K11", name: "K11", tenant: "Handsome", phone: "0762513401", paid: false, vacant: false, notes: "" },
+                { id: "K12", name: "K12", tenant: "Blessing", phone: "0813376349", paid: false, vacant: false, notes: "" },
+                { id: "K13", name: "K13", tenant: "Suzan", phone: "0630765913", paid: false, vacant: false, notes: "" },
+                { id: "K14", name: "K14", tenant: "Dudu", phone: "0639817248", paid: false, vacant: false, notes: "" },
+                { id: "K15", name: "K15", tenant: "Siyanda", phone: "0636270390", paid: false, vacant: false, notes: "" },
+                { id: "K16", name: "K16", tenant: "Vicky", phone: "0738082521", paid: false, vacant: false, notes: "" },
+                { id: "K17", name: "K17", tenant: "Precious", phone: "0737811369", paid: false, vacant: false, notes: "" },
+                { id: "K18", name: "K18", tenant: "Mandla", phone: "0688610191", paid: false, vacant: false, notes: "" },
+                { id: "K19", name: "K19", tenant: "Lebo Monyane", phone: "0780324770", paid: false, vacant: false, notes: "" },
+                { id: "K20", name: "K20", tenant: "Boniswa Ntombela", phone: "0663551131", paid: false, vacant: false, notes: "" },
+                { id: "K21", name: "K21", tenant: "Elsie", phone: "0737118408", paid: false, vacant: false, notes: "" },
+                { id: "K22", name: "K22", tenant: "Siphelele", phone: "0631272073", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "23_3rd",
+            name: "23 3rd Avenue",
+            rooms: [
+                { id: "M1", name: "M1", tenant: "Gomotsegang", phone: "0676123812", paid: false, vacant: false, notes: "" },
+                { id: "M2", name: "M2", tenant: "Lucky", phone: "0694195333", paid: false, vacant: false, notes: "" },
+                { id: "M3", name: "M3", tenant: "Nomusa", phone: "0726608953", paid: false, vacant: false, notes: "" },
+                { id: "M4", name: "M4", tenant: "Thabo", phone: "0766443994", paid: false, vacant: false, notes: "" },
+                { id: "M5", name: "M5", tenant: "Tsholofelo", phone: "0751549193", paid: false, vacant: false, notes: "" },
+                { id: "M6", name: "M6", tenant: "Sephiwe", phone: "0782757346", paid: false, vacant: false, notes: "" },
+                { id: "M7", name: "M7", tenant: "Mogomotsi Saku", phone: "0719133334", paid: false, vacant: false, notes: "" },
+                { id: "M8", name: "M8", tenant: "Elly", phone: "0733386807", paid: false, vacant: false, notes: "" },
+                { id: "M9", name: "M9", tenant: "Themba", phone: "0677299315", paid: false, vacant: false, notes: "" },
+                { id: "M10", name: "M10", tenant: "Benny", phone: "0721384683", paid: false, vacant: false, notes: "" },
+                { id: "M11", name: "M11", tenant: "Palesa", phone: "0786019890", paid: false, vacant: false, notes: "" },
+                { id: "M12", name: "M12", tenant: "Nomsa", phone: "0603163924", paid: false, vacant: false, notes: "" },
+                { id: "M13", name: "M13", tenant: "Kamogelo", phone: "0685831502", paid: false, vacant: false, notes: "" },
+                { id: "M14", name: "M14", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "M15", name: "M15", tenant: "Sithole", phone: "0732275110", paid: false, vacant: false, notes: "" },
+                { id: "M16", name: "M16", tenant: "Sindiso", phone: "0635372154", paid: false, vacant: false, notes: "" },
+                { id: "M17", name: "M17", tenant: "Sipho", phone: "0725646674", paid: false, vacant: false, notes: "" },
+                { id: "M18", name: "M18", tenant: "Faniswa", phone: "0762992529", paid: false, vacant: false, notes: "" },
+                { id: "M19", name: "M19", tenant: "Chi-Ann Stone", phone: "0624133563", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "106_8th",
+            name: "106 8th Avenue",
+            rooms: [
+                { id: "A1", name: "A1", tenant: "Minky", phone: "0739663423", paid: false, vacant: false, notes: "" },
+                { id: "A2", name: "A2", tenant: "Siya", phone: "0736228992", paid: false, vacant: false, notes: "" },
+                { id: "A3", name: "A3", tenant: "Prince", phone: "0717892414", paid: false, vacant: false, notes: "" },
+                { id: "A4", name: "A4", tenant: "Samkelo", phone: "0783568496", paid: false, vacant: false, notes: "" },
+                { id: "A5", name: "A5", tenant: "Ntsako Mahori", phone: "0699215546", paid: false, vacant: false, notes: "" },
+                { id: "A6", name: "A6", tenant: "Talent Tshuma", phone: "0692268658", paid: false, vacant: false, notes: "" },
+                { id: "A7", name: "A7", tenant: "Kabelo Mahlaba", phone: "0631808864", paid: false, vacant: false, notes: "" },
+                { id: "A8", name: "A8", tenant: "Mbano", phone: "0630186860", paid: false, vacant: false, notes: "" },
+                { id: "A9", name: "A9", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "A10", name: "A10", tenant: "Pfano", phone: "0685171622", paid: false, vacant: false, notes: "" },
+                { id: "A11", name: "A11", tenant: "Zinhle", phone: "0680347348", paid: false, vacant: false, notes: "" },
+                { id: "A12", name: "A12", tenant: "Jacqueline", phone: "0822245126", paid: false, vacant: false, notes: "" },
+                { id: "A13", name: "A13", tenant: "Mduduzi", phone: "0785880592", paid: false, vacant: false, notes: "" },
+                { id: "A14", name: "A14", tenant: "Sandile", phone: "0691831591", paid: false, vacant: false, notes: "" },
+                { id: "A15", name: "A15", tenant: "Dipuo", phone: "0734572316", paid: false, vacant: false, notes: "" },
+                { id: "A16", name: "A16", tenant: "Reggy Sebati", phone: "0783653891", paid: false, vacant: false, notes: "" },
+                { id: "A17", name: "A17", tenant: "Khanyi", phone: "0795596309", paid: false, vacant: false, notes: "" },
+                { id: "A18", name: "A18", tenant: "Arlination", phone: "0610912153", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "86_8th",
+            name: "86 8th Avenue",
+            rooms: [
+                { id: "R1", name: "R1", tenant: "Rudzani", phone: "0761333722", paid: false, vacant: false, notes: "" },
+                { id: "R2", name: "R2", tenant: "Kenneth", phone: "0785920457", paid: false, vacant: false, notes: "" },
+                { id: "R3", name: "R3", tenant: "Kholo Molatela", phone: "0798259949", paid: false, vacant: false, notes: "" },
+                { id: "R4", name: "R4", tenant: "Lebepa", phone: "0766171807", paid: false, vacant: false, notes: "" },
+                { id: "R5", name: "R5", tenant: "Britain", phone: "0678555056", paid: false, vacant: false, notes: "" },
+                { id: "R6", name: "R6", tenant: "Busani", phone: "0818265912", paid: false, vacant: false, notes: "" },
+                { id: "R7", name: "R7", tenant: "Kayiti", phone: "0659338334", paid: false, vacant: false, notes: "" },
+                { id: "R8", name: "R8", tenant: "Lebogang", phone: "0781137283", paid: false, vacant: false, notes: "" },
+                { id: "R9", name: "R9", tenant: "Nhlanhla Cele", phone: "0736365117", paid: false, vacant: false, notes: "" },
+                { id: "R10", name: "R10", tenant: "Zimbini", phone: "0788564877", paid: false, vacant: false, notes: "" },
+                { id: "R11", name: "R11", tenant: "Collins", phone: "0713766597", paid: false, vacant: false, notes: "" },
+                { id: "R12", name: "R12", tenant: "Elphas", phone: "0742377666", paid: false, vacant: false, notes: "" },
+                { id: "R13", name: "R13", tenant: "Eunice", phone: "0828129506", paid: false, vacant: false, notes: "" },
+                { id: "R14", name: "R14", tenant: "Sfiso", phone: "0837252098", paid: false, vacant: false, notes: "" },
+                { id: "R15", name: "R15", tenant: "Oarabeng", phone: "0797657371", paid: false, vacant: false, notes: "" },
+                { id: "R16", name: "R16", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "R17", name: "R17", tenant: "Matoka", phone: "0839908589", paid: false, vacant: false, notes: "" },
+                { id: "R18", name: "R18", tenant: "Itumeleng", phone: "0737716905", paid: false, vacant: false, notes: "" },
+                { id: "R19", name: "R19", tenant: "Ellen", phone: "0729764456", paid: false, vacant: false, notes: "" },
+                { id: "R20", name: "R20", tenant: "Tokollo", phone: "0602178896", paid: false, vacant: false, notes: "" },
+                { id: "R21", name: "R21", tenant: "Mulibana Ivy", phone: "0827608953", paid: false, vacant: false, notes: "" },
+                { id: "R22", name: "R22", tenant: "Japan", phone: "0604399490", paid: false, vacant: false, notes: "" },
+                { id: "R23", name: "R23", tenant: "Njabulo", phone: "0717260138", paid: false, vacant: false, notes: "" },
+                { id: "R24", name: "R24", tenant: "Khuthadzo", phone: "0799365543", paid: false, vacant: false, notes: "" },
+                { id: "R25", name: "R25", tenant: "Matoka", phone: "0839908589", paid: false, vacant: false, notes: "Duplicate" },
+                { id: "R26", name: "R26", tenant: "Queen", phone: "0717330760", paid: false, vacant: false, notes: "" },
+                { id: "R27", name: "R27", tenant: "Solomon", phone: "0639513691", paid: false, vacant: false, notes: "" }
+            ]
+        },
+        {
+            id: "137_8th",
+            name: "137 8th Avenue",
+            rooms: [
+                { id: "P1", name: "P1", tenant: "Mthandeni", phone: "0616195949", paid: false, vacant: false, notes: "" },
+                { id: "P2", name: "P2", tenant: "Ruwayda", phone: "0713588035", paid: false, vacant: false, notes: "" },
+                { id: "P3", name: "P3", tenant: "James Mahlaela", phone: "0767090043", paid: false, vacant: false, notes: "" },
+                { id: "P4", name: "P4", tenant: "Sebonelo Mhlongo", phone: "0644693395", paid: false, vacant: false, notes: "" },
+                { id: "P5", name: "P5", tenant: "Empty", phone: "", paid: false, vacant: true, notes: "Vacant" },
+                { id: "P6", name: "P6", tenant: "Dladla Xolane", phone: "0638449483", paid: false, vacant: false, notes: "" },
+                { id: "P7", name: "P7", tenant: "Sharon", phone: "0649286339", paid: false, vacant: false, notes: "" },
+                { id: "P8", name: "P8", tenant: "Martin", phone: "0677125975", paid: false, vacant: false, notes: "" },
+                { id: "P9", name: "P9", tenant: "Dineo Serunya", phone: "0761970071", paid: false, vacant: false, notes: "" },
+                { id: "P10", name: "P10", tenant: "Thabo", phone: "0693812268", paid: false, vacant: false, notes: "" },
+                { id: "P11", name: "P11", tenant: "Ntokozo", phone: "0631842850", paid: false, vacant: false, notes: "" },
+                { id: "P12", name: "P12", tenant: "Bernard", phone: "0782940841", paid: false, vacant: false, notes: "" },
+                { id: "P13", name: "P13", tenant: "Pearl", phone: "0784271166", paid: false, vacant: false, notes: "" }
+            ]
+        }
+    ];
+
+    let currentFilter = 'all';
+    let expandedProperties = {};
+
+    // Load/Save
+    function loadData() {
+        const saved = localStorage.getItem('allPropertiesRentData');
+        if (saved) {
+            const savedData = JSON.parse(saved);
+            for (let prop of propertiesData) {
+                const savedProp = savedData.find(p => p.id === prop.id);
+                if (savedProp) {
+                    for (let room of prop.rooms) {
+                        const savedRoom = savedProp.rooms.find(r => r.id === room.id);
+                        if (savedRoom) {
+                            room.paid = savedRoom.paid;
+                            room.tenant = savedRoom.tenant || room.tenant;
+                            room.phone = savedRoom.phone || room.phone;
+                            room.notes = savedRoom.notes || room.notes;
+                        }
+                    }
+                }
+            }
+        }
+        // Initialize expanded state
+        for (let prop of propertiesData) {
+            expandedProperties[prop.id] = true;
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('allPropertiesRentData', JSON.stringify(propertiesData));
+    }
+
+    // Summary
+    function renderSummary() {
+        let totalRooms = 0;
+        let paidCount = 0;
+        let occupiedCount = 0;
+        
+        for (let prop of propertiesData) {
+            for (let room of prop.rooms) {
+                if (!room.vacant) {
+                    totalRooms++;
+                    occupiedCount++;
+                    if (room.paid) paidCount++;
+                }
+            }
+        }
+        const unpaidCount = occupiedCount - paidCount;
+        
+        document.getElementById('summary').innerHTML = `
+            <div class="summary-item"><strong>🏘️ ${propertiesData.length}</strong> Properties</div>
+            <div class="summary-item"><strong>🚪 ${occupiedCount}</strong> Occupied Rooms</div>
+            <div class="summary-item"><strong>✅ ${paidCount}</strong> Paid</div>
+            <div class="summary-item"><strong>⚠️ ${unpaidCount}</strong> Unpaid</div>
+        `;
+    }
+
+    // Render all properties
+    function renderAll() {
+        const container = document.getElementById('propertiesContainer');
+        let html = '';
+        
+        for (let prop of propertiesData) {
+            let roomsToShow = prop.rooms;
+            if (currentFilter === 'paid') {
+                roomsToShow = prop.rooms.filter(r => r.paid === true && !r.vacant);
+            } else if (currentFilter === 'unpaid') {
+                roomsToShow = prop.rooms.filter(r => r.paid === false && !r.vacant);
+            }
+            
+            const showClass = expandedProperties[prop.id] ? 'show' : '';
+            
+            html += `
+                <div class="property-card" data-prop-id="${prop.id}">
+                    <div class="property-header" data-prop-id="${prop.id}">
+                        <span>🏠 ${prop.name} <span style="font-size:0.8rem;">(${prop.rooms.filter(r => !r.vacant).length} rooms)</span></span>
+                        <span class="toggle-icon">${expandedProperties[prop.id] ? '▼' : '▶'}</span>
+                    </div>
+                    <div class="property-content ${showClass}">
+                        <table>
+                            <thead>
+                                <tr><th>Room</th><th>Tenant</th><th>Phone</th><th>Status</th><th>Action</th><th>Notes</th></tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            for (let room of roomsToShow) {
+                const statusClass = room.vacant ? 'status-vacant' : (room.paid ? 'status-paid' : 'status-unpaid');
+                const statusText = room.vacant ? '📭 Vacant' : (room.paid ? '✅ Paid' : '❌ Unpaid');
+                const toggleText = room.vacant ? 'Vacant' : (room.paid ? 'Mark Unpaid' : 'Mark Paid');
+                const toggleClass = room.vacant ? 'toggle-vacant' : (room.paid ? 'toggle-unpaid' : 'toggle-paid');
+                const isDeposit = room.id === "H16";
+                
+                html += `
+                    <tr data-prop-id="${prop.id}" data-room-id="${room.id}">
+                        <td><strong>${room.name}</strong>${isDeposit ? ' <span class="deposit-badge">Deposit</span>' : ''}</td>
+                        <td>${room.vacant ? '<span class="vacant-text">Vacant</span>' : `<input type="text" value="${escapeHtml(room.tenant)}" class="tenant-input" data-prop="${prop.id}" data-room="${room.id}">`}</td>
+                        <td>${room.vacant ? '-' : `<input type="tel" value="${escapeHtml(room.phone)}" class="phone-input" data-prop="${prop.id}" data-room="${room.id}">`}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${!room.vacant ? `<button class="toggle-btn ${toggleClass}" data-prop="${prop.id}" data-room="${room.id}">${toggleText}</button>` : '<span class="vacant-text">N/A</span>'}</td>
+                        <td><input type="text" value="${escapeHtml(room.notes)}" class="notes-input" data-prop="${prop.id}" data-room="${room.id}" placeholder="Notes"></td>
+                    </tr>
+                `;
+            }
+            
+            if (roomsToShow.filter(r => !r.vacant).length === 0 && currentFilter !== 'all') {
+                html += `<tr><td colspan="6" style="text-align:center; padding:20px;">No rooms match filter</td></tr>`;
+            }
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+        renderSummary();
+        attachEventListeners();
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function attachEventListeners() {
+        // Toggle property expansion
+        document.querySelectorAll('.property-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                const propId = header.dataset.propId;
+                expandedProperties[propId] = !expandedProperties[propId];
+                renderAll();
+            });
+        });
+        
+        // Toggle payment buttons
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const propId = btn.dataset.prop;
+                const roomId = btn.dataset.room;
+                const prop = propertiesData.find(p => p.id === propId);
+                if (prop) {
+                    const room = prop.rooms.find(r => r.id === roomId);
+                    if (room && !room.vacant) {
+                        room.paid = !room.paid;
+                        saveData();
+                        renderAll();
+                    }
+                }
+            });
+        });
+        
+        // Tenant input
+        document.querySelectorAll('.tenant-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const propId = this.dataset.prop;
+                const roomId = this.dataset.room;
+                const prop = propertiesData.find(p => p.id === propId);
+                if (prop) {
+                    const room = prop.rooms.find(r => r.id === roomId);
+                    if (room) room.tenant = this.value;
+                    saveData();
+                }
+            });
+        });
+        
+        // Phone input
+        document.querySelectorAll('.phone-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const propId = this.dataset.prop;
+                const roomId = this.dataset.room;
+                const prop = propertiesData.find(p => p.id === propId);
+                if (prop) {
+                    const room = prop.rooms.find(r => r.id === roomId);
+                    if (room) room.phone = this.value;
+                    saveData();
+                }
+            });
+        });
+        
+        // Notes input
+        document.querySelectorAll('.notes-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const propId = this.dataset.prop;
+                const roomId = this.dataset.room;
+                const prop = propertiesData.find(p => p.id === propId);
+                if (prop) {
+                    const room = prop.rooms.find(r => r.id === roomId);
+                    if (room) room.notes = this.value;
+                    saveData();
+                }
+            });
+        });
+    }
+    
+    // Expand/Collapse all
+    function expandAll() {
+        for (let prop of propertiesData) {
+            expandedProperties[prop.id] = true;
+        }
+        renderAll();
+    }
+    
+    function collapseAll() {
+        for (let prop of propertiesData) {
+            expandedProperties[prop.id] = false;
+        }
+        renderAll();
+    }
+    
+    // Mark all unpaid (new month)
+    function markAllUnpaid() {
+        if (confirm("⚠️ Mark ALL occupied rooms as UNPAID for the new month? This will reset payment status for all tenants.")) {
+            for (let prop of propertiesData) {
+                for (let room of prop.rooms) {
+                    if (!room.vacant) {
+                        room.paid = false;
+                    }
+                }
+            }
+            saveData();
+            renderAll();
+        }
+    }
+    
+    // Export data
+    function exportData() {
+        const dataStr = JSON.stringify(propertiesData, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `all-properties-rent-data-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert("✅ Data exported! Keep this file as backup.");
+    }
+    
+    // Initialize
+    loadData();
+    renderAll();
+    
+    // Event listeners for controls
+    document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+    document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+    document.getElementById('markAllUnpaidBtn').addEventListener('click', markAllUnpaid);
+    document.getElementById('exportDataBtn').addEventListener('click', exportData);
+    
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            renderAll();
+        });
+    });
+</script>
 </body>
 </html>
